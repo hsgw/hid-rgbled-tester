@@ -36,37 +36,65 @@ function automode(device, mode, timerId) {
   return timerId;
 }
 
+function cleanup(device, timerId) {
+  console.log("clean up");
+  if (device.opened) device.close();
+  if (timerId) clearInterval(timerId);
+  connectButton.disabled = null;
+  device.removeEventListener("inputreport", handshakeHandler);
+}
+
 async function handshakeHandler(e) {
+  async function onColorChange(color) {
+    const data = new Uint8Array(REPORT_COUNT);
+    const hsv = hsvFromPicker(color.hsv);
+    data[0] = 1;
+    data[1] = hsv.h;
+    data[2] = hsv.s;
+    data[3] = hsv.v;
+    try {
+      await e.device.sendReport(0x00, data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  let automodeTimerId;
   let response = "";
   for (let i = 1; i < 4; i++) {
     response += String.fromCharCode(e.data.getUint8(i));
   }
   if (e.data.getUint8(0) == 1 && response == "RGB") {
     // Successful handshake
+
     clearTimeout(handshake_timeout);
     console.log("Successful handshake");
     connectButton.textContent = "CONNECTED";
     e.device.removeEventListener("inputreport", handshakeHandler);
 
-    colorPicker.on("color:change", async (color) => {
-      const data = new Uint8Array(REPORT_COUNT);
-      const hsv = hsvFromPicker(color.hsv);
-      data[0] = 1;
-      data[1] = hsv.h;
-      data[2] = hsv.s;
-      data[3] = hsv.v;
-      await e.device.sendReport(0x00, data);
+    navigator.hid.addEventListener("disconnect", ({ device }) => {
+      console.log("Disconnected");
+      if (e.device.opened) e.device.close();
+      if (automodeTimerId) clearInterval(automodeTimerId);
+      connectButton.disabled = null;
+      colorPicker.off("color:change", onColorChange);
+      automodeRadio.removeEventListener("change", automodeRadioEventHandler);
     });
 
-    let automodeTimerId = automode(e.device, "H", undefined);
+    colorPicker.on("color:change", onColorChange);
 
-    automodeRadio.addEventListener("change", (f) => {
+    automodeRadio.elements[0].checked = true;
+    automodeTimerId = automode(e.device, "H", undefined);
+
+    function automodeRadioEventHandler(ev) {
       automodeTimerId = automode(
         e.device,
-        f.currentTarget.elements["automode"].value,
+        ev.currentTarget.elements["automode"].value,
         automodeTimerId
       );
-    });
+    }
+
+    automodeRadio.addEventListener("change", automodeRadioEventHandler);
   } else {
     console.log("Wrong handshake command");
     connectButton.disabled = null;
