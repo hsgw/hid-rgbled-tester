@@ -36,14 +36,6 @@ function automode(device, mode, timerId) {
   return timerId;
 }
 
-function cleanup(device, timerId) {
-  console.log("clean up");
-  if (device.opened) device.close();
-  if (timerId) clearInterval(timerId);
-  connectButton.disabled = null;
-  device.removeEventListener("inputreport", handshakeHandler);
-}
-
 async function handshakeHandler(e) {
   async function onColorChange(color) {
     const data = new Uint8Array(REPORT_COUNT);
