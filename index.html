@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QMK HID-RGB</title>
+  </head>
+  <body>
+    <h1>QMK-RGBLED Controll Test</h1>
+    <h2>試し方</h2>
+    <p>
+      <ol>
+        <li><a href="https://github.com/hsgw/qmk_firmware/tree/hid_rgbled">https://github.com/hsgw/qmk_firmware/tree/hid_rgbled</a>をcloneする</li>
+        <li>keyboards/hid_rgbled にディレクトリを追加してinfo.jsonなどを編集する</li>
+        <li>defaultのキーマップをコンパイルしてキーボードに書き込む(keymaps/testはLED動作テスト用です)</li>
+        <li>下のconnectを押してキーボードを選択するとぴかぴか光る</li>
+      </ol>
+    </p>
+    
+    <button type="button" id="connect">CONNECT</button>
+    
+    <script type="text/javascript">
+      let handshake_timeout;
+      async function handshakeHandler(e) {
+        let response = "";
+        for (let i = 1; i < 4; i++) {
+          response += String.fromCharCode(e.data.getUint8(i));
+        }
+        if (e.data.getUint8(0) == 1 && response == "RGB") {
+          clearTimeout(handshake_timeout);
+          console.log("Success for handshake");
+          e.device.removeEventListener("inputreport", handshakeHandler);
+
+          // e.device.addEventListener("inputreport", (e) => {
+          //   console.log(e);
+          // });
+
+          const data = new Uint8Array(
+            e.device.collections[0].inputReports[0].items[0].reportCount
+          );
+
+          data[0] = 1;
+          data[1] = 0;
+          data[2] = 255;
+          data[3] = 255;
+
+          setInterval(async () => {
+            data[1]++;
+            if (data[1] > 255) data[3] = 0;
+            await e.device.sendReport(0x00, data);
+          }, 1);
+        } else {
+          console.log("Wrong handshake command");
+          console.log(e);
+        }
+      }
+
+      document.querySelector("#connect").addEventListener("click", async () => {
+        try {
+          const devices = await navigator.hid.requestDevice({
+            filters: [{ usagePage: 0xff60, usage: 0x61 }],
+          });
+          const device = devices[0];
+          if (!device) {
+            console.log("Device is not selected");
+          } else {
+            const report_count =
+              device.collections[0].inputReports[0].items[0].reportCount;
+            if (device.opened) await device.close();
+            await device.open();
+            device.addEventListener("inputreport", handshakeHandler);
+
+            // send handshake
+            handshake_timeout = setTimeout(() => {
+              console.error("Handshake timeout");
+              device.close();
+            }, 1000);
+            const data = new Uint8Array(report_count);
+            data[0] = 0;
+            await device.sendReport(0x00, data);
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      });
+    </script>
+  </body>
+</html>
