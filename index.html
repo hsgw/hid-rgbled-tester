@@ -4,27 +4,42 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>QMK HID-RGB</title>
+    <style>
+      body {
+        background-color: #181818;
+        color: #fff;
+        padding: 0 0.5em;
+      }
+      a {
+        color: aqua;
+      }
+      button {
+        padding: 0.5em;
+      }
+    </style>
   </head>
   <body>
     <h1>QMK-RGBLED Controll Test</h1>
     <h2>試し方</h2>
     <ol>
       <li>
-        <a href="https://github.com/hsgw/qmk_firmware/tree/hid_rgbled">
-          https://github.com/hsgw/qmk_firmware/tree/hid_rgbled
+        ここを読む
+        <br />
+        <a href="https://sirrow.github.io/keyboard_pikapika_system_doc/">
+          https://sirrow.github.io/keyboard_pikapika_system_doc/
         </a>
-        をcloneする
       </li>
-      <li>keyboards/hid_rgbled にディレクトリを追加してinfo.jsonなどを編集する</li>
+      <li>キーボードをPCにUSB接続する</li>
       <li>
-        defaultのキーマップをコンパイルしてキーボードに書き込む(keymaps/testはLED動作テスト用です)
+        下のconnectを押してキーボードを選択するとぴかぴか光る
+        <br />
+        なにか起こったらリロードしてください
       </li>
-      <li>下のconnectを押してキーボードを選択するとぴかぴか光る</li>
     </ol>
 
-    <button type="button" id="connect">CONNECT</button>
-
     <div>
+      <h3>キーボードを接続する</h3>
+      <button type="button" id="connect">CONNECT</button>
       <h3>Auto</h3>
       <form id="automode">
         <label>
