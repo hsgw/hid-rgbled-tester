@@ -145,7 +145,7 @@ soundButton.addEventListener("click", async () => {
       analyser.getByteFrequencyData(dataArray);
       analyser.minDecibels = -90;
       analyser.maxDecibels = -10;
-      analyser.smoothingTimeConstant = 0;
+      analyser.smoothingTimeConstant = 0.2;
 
       const topFrequency = 1000;
 
