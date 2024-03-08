@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QMK HID-RGB</title>
+    <style>
+      body {
+        background-color: #181818;
+        color: #fff;
+        padding: 0 0.5em;
+      }
+      a {
+        color: aqua;
+      }
+      button {
+        padding: 0.5em;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>QMK-RGBLED Controll Test</h1>
+    <h2>試し方</h2>
+    <ol>
+      <li>
+        ここを読む
+        <br />
+        <a href="https://sirrow.github.io/keyboard_pikapika_system_doc/">
+          https://sirrow.github.io/keyboard_pikapika_system_doc/
+        </a>
+      </li>
+      <li>キーボードをPCにUSB接続する</li>
+      <li>
+        下のconnectを押してキーボードを選択するとぴかぴか光る
+        <br />
+        なにか起こったらリロードしてください
+      </li>
+    </ol>
+
+    <div>
+      <h3>キーボードを接続する</h3>
+      <button type="button" id="connect">CONNECT</button>
+    </div>
+    <div>
+      <h3>Auto</h3>
+      <form id="automode">
+        <label>
+          <input type="radio" name="automode" value="H" checked />
+          Hue
+        </label>
+        <label>
+          <input type="radio" name="automode" value="S" />
+          Saturation
+        </label>
+        <label>
+          <input type="radio" name="automode" value="V" />
+          Value
+        </label>
+        <label>
+          <input type="radio" name="automode" value="Off" />
+          Off
+        </label>
+      </form>
+    </div>
+
+    <div>
+      <h3>Sound</h3>
+      <button type="button" id="sound">START</button>
+      <input type="range" min="0" max="5.0" step="0.1" value="2" class="slider" id="gain" />
+    </div>
+
+    <div>
+      <h3>Manual</h3>
+      <div id="picker"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
+    <script type="text/javascript" src="script.js"></script>
+  </body>
+</html>
