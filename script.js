@@ -1,6 +1,8 @@
 const REPORT_COUNT = 32;
 
 const connectButton = document.querySelector("#connect");
+const soundButton = document.querySelector("#sound");
+const soundSlider = document.querySelector("#gain");
 const automodeRadio = document.querySelector("#automode");
 
 let handshake_timeout;
@@ -122,5 +124,41 @@ connectButton.addEventListener("click", async () => {
     }
   } catch (error) {
     console.error(error);
+  }
+});
+
+soundButton.addEventListener("click", async () => {
+  soundButton.disabled = "disabled";
+  try {
+    const audioContext = new AudioContext();
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const source = audioContext.createMediaStreamSource(stream);
+    const analyser = audioContext.createAnalyser();
+
+    source.connect(analyser);
+
+    await audioContext.resume();
+
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    function updateVisualization() {
+      analyser.getByteFrequencyData(dataArray);
+      analyser.minDecibels = -90;
+      analyser.maxDecibels = -10;
+      analyser.smoothingTimeConstant = 0;
+
+      const topFrequency = 1000;
+
+      const volume =
+        dataArray.slice(0, topFrequency).reduce((acc, val) => acc + val, 0) / topFrequency;
+
+      colorPicker.color.value = volume > 100 ? 100 : volume;
+      requestAnimationFrame(updateVisualization);
+    }
+
+    updateVisualization();
+  } catch (error) {
+    soundButton.disabled = null;
+    console.error("Error setting up audio:", error);
   }
 });
